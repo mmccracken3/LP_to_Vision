@@ -1,5 +1,5 @@
 '''
-2025-02-12 .01
+2025-04-07 .01
 '''
 
 import sys
@@ -16,7 +16,7 @@ PROJECT_BG_NUMBER_REGEX = re.compile(r'(\d\S+)\.(\S+)')
 PROJECT_NUMBER_REGEX = re.compile(r'(\d\S+)')
 MISC_BG_REGEX = re.compile(r'Miscellaneous.+>.+(\.\S+)')
 EMPLOYEE_NAME_REGEX = re.compile(r'(\S+$)')
-SPECIAL_PROJ_REGEX = re.compile(r'(General Business - Non-Billable Tasks > )([^>]+)(\s>.+)?')
+SPECIAL_PROJ_REGEX = re.compile(r'(General Business - Non-Billable Tasks > )((?!Non-Billable\sTasks))([^>]+)(\s>.+)?')
 
 SPECIAL_PROJECT_NUMS_PROJECTS = {'OVH - Overhead': {'Project Number': 'OVH',
                                                     'Phase': '15',
@@ -119,7 +119,12 @@ EMPLOYEE_NUMBER = {'ASHWORTH': 'ASHWORTH',
                    'ALLISONWRIGHT': 'WRIGHT',
                    'HEATHLEE': 'LEE',
                    'JEFFKELLEY': 'KELLEY',
-                   'GILBERTELLIS': 'ELLIS G'
+                   'GILBERTELLIS': 'ELLIS G',
+                   'MANDYBORDEN': 'BORDEN',
+                   'WILLSIMONS': 'SIMONS',
+                   'JOSTYRE': 'TYRE J',
+                   'SARABUCKLAND': 'BUCKLAND',
+                   'MARTIN': 'MARTIN W'
                    }
 
 
@@ -181,7 +186,7 @@ def read_file_contents(filename):
             # Special Case - Project
             special_project_match = SPECIAL_PROJ_REGEX.search(row['folder'])
             if special_project_match is not None:
-                special_project_match = special_project_match.group(2)
+                special_project_match = special_project_match.group(3)
                 if special_project_match in SPECIAL_PROJECT_NUMS_PROJECTS:
                     project_number = SPECIAL_PROJECT_NUMS_PROJECTS[special_project_match]['Project Number']
                     phase = SPECIAL_PROJECT_NUMS_PROJECTS[special_project_match]['Phase']
@@ -202,6 +207,10 @@ def read_file_contents(filename):
             elif '- inspection' == row['task'][-12:].lower():
                 project_number_match = PROJECT_NUMBER_REGEX.search(row['task'])
                 project_number = project_number_match.group(1)
+                phase, task = phase_task_parse(row['activity'])
+            elif '(A/S)' in row['folder']:
+                project_number_match = PROJECT_BG_NUMBER_REGEX.search(row['project'])
+                project_number = project_number_match.group(1) + '.003'
                 phase, task = phase_task_parse(row['activity'])
             else:
                 project_number_match = PROJECT_BG_NUMBER_REGEX.search(row['project'])
